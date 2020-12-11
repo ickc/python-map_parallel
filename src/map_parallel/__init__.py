@@ -1,4 +1,7 @@
 __version__ = '0.1.1'
+
+from functools import partial
+from itertools import starmap
 from typing import Optional
 
 
@@ -8,10 +11,78 @@ def _starfunc(f, x):
     return f(*x)
 
 
+def _map_parallel_multiprocessing(
+    f, *args,
+    processes: Optional[int] = None,
+):
+    from concurrent.futures import ProcessPoolExecutor
+
+    with ProcessPoolExecutor(max_workers=processes) as process_pool_executor:
+        return list(process_pool_executor.map(f, *args))
+
+
+def _starmap_parallel_multiprocessing(
+    f, args,
+    processes: Optional[int] = None,
+):
+    from concurrent.futures import ProcessPoolExecutor
+
+    with ProcessPoolExecutor(max_workers=processes) as process_pool_executor:
+        return list(process_pool_executor.map(partial(_starfunc, f), args))
+
+
+def _map_parallel_multithreading(
+    f, *args,
+    processes: Optional[int] = None,
+):
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=processes) as thread_pool_executor:
+        return list(thread_pool_executor.map(f, *args))
+
+
+def _starmap_parallel_multithreading(
+    f, args,
+    processes: Optional[int] = None,
+):
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=processes) as thread_pool_executor:
+        return list(thread_pool_executor.map(partial(_starfunc, f), args))
+
+
+def _map_parallel_mpi(f, *args, **kwargs):
+    from mpi4py.futures import MPIPoolExecutor
+
+    with MPIPoolExecutor() as mpi_pool_executor:
+        return list(mpi_pool_executor.map(f, *args))
+
+
+def _starmap_parallel_mpi(f, args, **kwargs):
+    from mpi4py.futures import MPIPoolExecutor
+
+    with MPIPoolExecutor() as mpi_pool_executor:
+        return list(mpi_pool_executor.starmap(f, args))
+
+
+_map_parallel_func = {
+    'multiprocessing': _map_parallel_multiprocessing,
+    'multithreading': _map_parallel_multithreading,
+    'mpi': _map_parallel_mpi,
+}
+
+
+_starmap_parallel_func = {
+    'multiprocessing': _starmap_parallel_multiprocessing,
+    'multithreading': _starmap_parallel_multithreading,
+    'mpi': _starmap_parallel_mpi,
+}
+
+
 def map_parallel(
     f, *args,
-    mode: str = 'multiprocessing',
     processes: Optional[int] = None,
+    mode: str = 'multiprocessing',
 ):
     '''equiv to `map(f, *args)` but in parallel
 
@@ -24,33 +95,18 @@ def map_parallel(
 
     (in the case of mpi, it is determined by mpiexec/mpirun args)
     '''
-    if processes is not None and processes == 1:
-        result = list(map(f, *args))
-    elif mode == 'multiprocessing':
-        from concurrent.futures import ProcessPoolExecutor
-
-        with ProcessPoolExecutor(max_workers=processes) as process_pool_executor:
-            result = list(process_pool_executor.map(f, *args))
-    elif mode == 'multithreading':
-        from concurrent.futures import ThreadPoolExecutor
-
-        with ThreadPoolExecutor(max_workers=processes) as thread_pool_executor:
-            result = list(thread_pool_executor.map(f, *args))
-    elif mode == 'mpi':
-        from mpi4py.futures import MPIPoolExecutor
-
-        with MPIPoolExecutor() as mpi_pool_executor:
-            result = mpi_pool_executor.map(f, *args)
-    else:
-        # fallback
-        result = list(map(f, *args))
-    return result
+    if processes is None or processes > 1:
+        try:
+            return _map_parallel_func[mode](f, *args, processes=processes)
+        except KeyError:
+            pass
+    return list(map(f, *args))
 
 
 def starmap_parallel(
     f, args,
-    mode: str = 'multiprocessing',
     processes: Optional[int] = None,
+    mode: str = 'multiprocessing',
 ):
     '''equiv to `starmap(f, args)` but in parallel
 
@@ -63,29 +119,9 @@ def starmap_parallel(
 
     (in the case of mpi, it is determined by mpiexec/mpirun args)
     '''
-    if processes is not None and processes == 1:
-        from itertools import starmap
-
-        result = list(starmap(f, args))
-    elif mode == 'multiprocessing':
-        from concurrent.futures import ProcessPoolExecutor
-        from functools import partial
-
-        with ProcessPoolExecutor(max_workers=processes) as process_pool_executor:
-            result = list(process_pool_executor.map(partial(_starfunc, f), args))
-    elif mode == 'multithreading':
-        from concurrent.futures import ThreadPoolExecutor
-        from functools import partial
-
-        with ThreadPoolExecutor(max_workers=processes) as thread_pool_executor:
-            result = list(thread_pool_executor.map(partial(_starfunc, f), args))
-    elif mode == 'mpi':
-        from mpi4py.futures import MPIPoolExecutor
-
-        with MPIPoolExecutor() as mpi_pool_executor:
-            result = mpi_pool_executor.starmap(f, args)
-    else:
-        # fallback
-        from itertools import starmap
-        result = list(starmap(f, args))
-    return result
+    if processes is None or processes > 1:
+        try:
+            return _starmap_parallel_func[mode](f, args, processes=processes)
+        except KeyError:
+            pass
+    return list(starmap(f, args))
