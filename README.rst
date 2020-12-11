@@ -32,7 +32,7 @@ Overview
     :target: https://landscape.io/github/ickc/python-map_parallel/master
     :alt: Code Quality Status
 
-.. |codacy| image:: https://img.shields.io/codacy/grade/[Get ID from https://app.codacy.com/app/ickc/python-map_parallel/settings].svg
+.. |codacy| image:: https://img.shields.io/codacy/grade/013d60298aae4c53b33916c44a6675ab.svg
     :target: https://www.codacy.com/app/ickc/python-map_parallel
     :alt: Codacy Code Quality Status
 
