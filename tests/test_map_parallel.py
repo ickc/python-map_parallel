@@ -12,7 +12,7 @@ ARGS = [
 ]
 args = list(map(list, zip(*ARGS)))
 
-# MPI is difficult to test
+# MPI is tested separately
 cases = list(product(('multiprocessing', 'multithreading', 'serial'), (None, 1, 2)))
 
 
