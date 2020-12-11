@@ -5,11 +5,10 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    continue-on-error: [2.7, pypy2]
     strategy:
-      max-parallel: 5
+      max-parallel: 6
       matrix:
-        python-version: [2.7, 3.6, 3.7, 3.8, 3.9, pypy2, pypy3]
+        python-version: [3.5, 3.6, 3.7, 3.8, 3.9, pypy3]
 
     steps:
     - uses: actions/checkout@v1
