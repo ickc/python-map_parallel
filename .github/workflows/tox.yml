@@ -11,7 +11,8 @@ jobs:
         python-version: [3.6, 3.7, 3.8, 3.9, pypy3]
 
     steps:
-    - uses: actions/checkout@v1
+    - name: Checkout
+      uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
@@ -23,11 +24,11 @@ jobs:
         sudo apt install -y mpich libmpich-dev
     - name: Test with tox
       run: tox
-    - name: Coveralls
+    - name: Coverage—Coveralls
       uses: AndreMiras/coveralls-python-action@develop
       with:
         parallel: true
-    - name: Upload coverage to Codecov
+    - name: Coverage—Codecov
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
@@ -36,7 +37,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-    - name: Coveralls Finished
+    - name: Coverage—Coveralls finishing
       uses: AndreMiras/coveralls-python-action@develop
       with:
         parallel-finished: true
