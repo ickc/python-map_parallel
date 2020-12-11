@@ -4,6 +4,7 @@ source =
    */site-packages
 
 [run]
+relative_files = True
 branch = true
 source =
     map_parallel
