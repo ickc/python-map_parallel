@@ -13,7 +13,7 @@ ARGS = [
 args = list(map(list, zip(*ARGS)))
 
 # MPI is difficult to test
-cases = list(product(('multiprocessing', 'multithreading'), (None, 1, 2)))
+cases = list(product(('multiprocessing', 'multithreading', 'mpi', 'serial'), (None, 1, 2)))
 
 
 def f(x, y, z):
