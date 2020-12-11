@@ -2,4 +2,4 @@
 Authors
 =======
 
-* Kolen Cheung - https://ickc.github.io/python-map_parallel
+* Kolen Cheung - https://python-map_parallel.readthedocs.io/

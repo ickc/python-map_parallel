@@ -10,7 +10,7 @@ Overview
     * - docs
       - |docs|
     * - tests
-      - | |travis|
+      - |
         | |coveralls| |codecov|
         | |landscape| |scrutinizer| |codacy| |codeclimate|
     * - package
@@ -19,10 +19,6 @@ Overview
 .. |docs| image:: https://readthedocs.org/projects/python-map_parallel/badge/?style=flat
     :target: https://readthedocs.org/projects/python-map_parallel
     :alt: Documentation Status
-
-.. |travis| image:: https://api.travis-ci.org/ickc/python-map_parallel.svg?branch=master
-    :alt: Travis-CI Build Status
-    :target: https://travis-ci.org/ickc/python-map_parallel
 
 .. |coveralls| image:: https://coveralls.io/repos/ickc/python-map_parallel/badge.svg?branch=master&service=github
     :alt: Coverage Status
