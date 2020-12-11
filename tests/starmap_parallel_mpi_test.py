@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from map_parallel import map_parallel
 from map_parallel import starmap_parallel
 
 ARGS = [
