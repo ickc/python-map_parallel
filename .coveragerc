@@ -7,7 +7,7 @@ source =
 relative_files = True
 branch = true
 source =
-    src/map_parallel
+    map_parallel
     tests
 parallel = true
 
