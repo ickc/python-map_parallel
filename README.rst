@@ -114,3 +114,8 @@ Note, to combine the coverage data from all the tox environments run:
       - ::
 
             PYTEST_ADDOPTS=--cov-append tox
+
+
+.. image:: https://api.codacy.com/project/badge/Grade/bd67be2c951147409d4edd27ba7682d8
+   :alt: Codacy Badge
+   :target: https://app.codacy.com/gh/ickc/python-map_parallel?utm_source=github.com&utm_medium=referral&utm_content=ickc/python-map_parallel&utm_campaign=Badge_Grade_Settings
