@@ -1,6 +1,7 @@
 from itertools import starmap
 
-from map_parallel import map_parallel, starmap_parallel
+from map_parallel import map_parallel
+from map_parallel import starmap_parallel
 
 ARGS = [
     [3, 4, 5],
