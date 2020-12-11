@@ -26,12 +26,12 @@ jobs:
       uses: AndreMiras/coveralls-python-action@develop
       with:
         parallel: true
-
-  coverage_finish:
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
+
+  coveralls_finish:
     needs: test
     runs-on: ubuntu-latest
     steps:
