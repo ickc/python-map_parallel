@@ -1,5 +1,7 @@
+MPIARGS ?= -oversubscribe
+
 mpi:
-	mpiexec -oversubscribe -np 2 coverage run --parallel-mode --branch map_parallel_mpi_test.py
-	mpiexec -oversubscribe -np 2 coverage run --parallel-mode --branch starmap_parallel_mpi_test.py
-	mpiexec -oversubscribe -np 1 coverage run --parallel-mode --branch starmap_parallel_mpi_test.py
-	mpiexec -oversubscribe -np 1 coverage run --parallel-mode --branch map_parallel_mpi_test.py
+	mpiexec $(MPIARGS) -np 2 coverage run --parallel-mode --branch map_parallel_mpi_test.py
+	mpiexec $(MPIARGS) -np 2 coverage run --parallel-mode --branch starmap_parallel_mpi_test.py
+	mpiexec $(MPIARGS) -np 1 coverage run --parallel-mode --branch starmap_parallel_mpi_test.py
+	mpiexec $(MPIARGS) -np 1 coverage run --parallel-mode --branch map_parallel_mpi_test.py
