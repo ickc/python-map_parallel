@@ -55,7 +55,8 @@ def _map_parallel_dask(
     f, *args,
     processes: Optional[int] = None,
 ):
-    from dask.distributed import Client, LocalCluster
+    from dask.distributed import Client
+    from dask.distributed import LocalCluster
 
     cluster = LocalCluster(n_workers=processes, dashboard_address=None)
     client = Client(cluster)
@@ -66,7 +67,8 @@ def _starmap_parallel_dask(
     f, args,
     processes: Optional[int] = None,
 ):
-    from dask.distributed import Client, LocalCluster
+    from dask.distributed import Client
+    from dask.distributed import LocalCluster
 
     cluster = LocalCluster(n_workers=processes, dashboard_address=None)
     client = Client(cluster)
