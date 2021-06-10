@@ -73,6 +73,17 @@ def _map_parallel_mpi(f: 'Callable', *args: 'Iterable', return_results: 'bool' =
             return []
 
 
+def _starmap_parallel_mpi(f: 'Callable', args: 'Iterable[Iterable]', return_results: 'bool' = True, **kwargs) -> 'list':
+    from mpi4py.futures import MPIPoolExecutor
+
+    with MPIPoolExecutor() as mpi_pool_executor:
+        res = mpi_pool_executor.starmap(f, args)
+        if return_results:
+            return list(res)
+        else:
+            return []
+
+
 def _starmap_parallel_mpi_simple(
     f: 'Callable',
     args: 'Iterable[Iterable]',
@@ -108,6 +119,7 @@ _map_parallel_func: 'Dict[str, Callable]' = {
 }
 
 _starmap_parallel_func: 'Dict[str, Callable]' = {
+    'mpi': _starmap_parallel_mpi,
     'mpi_simple': _starmap_parallel_mpi_simple,
 }
 
@@ -155,8 +167,8 @@ def starmap_parallel(
     See docstring from :func:`~map_parallel.map_parallel`
     '''
     if processes is None or processes > 1:
-        if mode in _map_parallel_func:
-            return _map_parallel_func[mode](f, *zip(*args), processes=processes, return_results=return_results)
-        elif mode in _starmap_parallel_func:
+        if mode in _starmap_parallel_func:
             return _starmap_parallel_func[mode](f, args, processes=processes, return_results=return_results)
+        elif mode in _map_parallel_func:
+            return _map_parallel_func[mode](f, *zip(*args), processes=processes, return_results=return_results)
     return list(starmap(f, args))
