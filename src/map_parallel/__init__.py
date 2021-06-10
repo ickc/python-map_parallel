@@ -1,4 +1,5 @@
-from __future__ import annotations
+# py37
+# from __future__ import annotations
 
 __version__ = '0.1.1'
 
@@ -11,11 +12,11 @@ if TYPE_CHECKING:
 
 
 def _map_parallel_multiprocessing(
-    f: Callable,
-    *args: Iterable,
-    processes: Optional[int] = None,
-    return_results: bool = True,
-) -> list:
+    f: 'Callable',
+    *args: 'Iterable',
+    processes: 'Optional[int]' = None,
+    return_results: 'bool' = True,
+) -> 'list':
     from concurrent.futures import ProcessPoolExecutor
 
     with ProcessPoolExecutor(max_workers=processes) as process_pool_executor:
@@ -27,11 +28,11 @@ def _map_parallel_multiprocessing(
 
 
 def _map_parallel_multithreading(
-    f: Callable,
-    *args: Iterable,
-    processes: Optional[int] = None,
-    return_results: bool = True,
-) -> list:
+    f: 'Callable',
+    *args: 'Iterable',
+    processes: 'Optional[int]' = None,
+    return_results: 'bool' = True,
+) -> 'list':
     from concurrent.futures import ThreadPoolExecutor
 
     with ThreadPoolExecutor(max_workers=processes) as thread_pool_executor:
@@ -43,11 +44,11 @@ def _map_parallel_multithreading(
 
 
 def _map_parallel_dask(
-    f: Callable,
-    *args: Iterable,
-    processes: Optional[int] = None,
-    return_results: bool = True,
-) -> list:
+    f: 'Callable',
+    *args: 'Iterable',
+    processes: 'Optional[int]' = None,
+    return_results: 'bool' = True,
+) -> 'list':
     from dask.distributed import Client
     from dask.distributed import LocalCluster
 
@@ -61,7 +62,7 @@ def _map_parallel_dask(
         return []
 
 
-def _map_parallel_mpi(f: Callable, *args: Iterable, return_results: bool = True, **kwargs) -> list:
+def _map_parallel_mpi(f: 'Callable', *args: 'Iterable', return_results: 'bool' = True, **kwargs) -> 'list':
     from mpi4py.futures import MPIPoolExecutor
 
     with MPIPoolExecutor() as mpi_pool_executor:
@@ -73,11 +74,11 @@ def _map_parallel_mpi(f: Callable, *args: Iterable, return_results: bool = True,
 
 
 def _starmap_parallel_mpi_simple(
-    f: Callable,
-    args: Iterable[Iterable],
-    return_results: bool = True,
+    f: 'Callable',
+    args: 'Iterable[Iterable]',
+    return_results: 'bool' = True,
     **kwargs,
-) -> list:
+) -> 'list':
     from mpi4py import MPI
 
     comm = MPI.COMM_WORLD
@@ -99,25 +100,25 @@ def _starmap_parallel_mpi_simple(
     return []
 
 
-_map_parallel_func: Dict[str, Callable] = {
+_map_parallel_func: 'Dict[str, Callable]' = {
     'multiprocessing': _map_parallel_multiprocessing,
     'multithreading': _map_parallel_multithreading,
     'dask': _map_parallel_dask,
     'mpi': _map_parallel_mpi,
 }
 
-_starmap_parallel_func: Dict[str, Callable] = {
+_starmap_parallel_func: 'Dict[str, Callable]' = {
     'mpi_simple': _starmap_parallel_mpi_simple,
 }
 
 
 def map_parallel(
-    f: Callable,
-    *args: Iterable,
-    processes: Optional[int] = None,
-    mode: str = 'multiprocessing',
-    return_results: bool = True,
-) -> list:
+    f: 'Callable',
+    *args: 'Iterable',
+    processes: 'Optional[int]' = None,
+    mode: 'str' = 'multiprocessing',
+    return_results: 'bool' = True,
+) -> 'list':
     '''equiv to `map(f, *args)` but in parallel
 
     :param str mode: backend for parallelization
@@ -143,12 +144,12 @@ def map_parallel(
 
 
 def starmap_parallel(
-    f: Callable,
-    args: Iterable[Iterable],
-    processes: Optional[int] = None,
-    mode: str = 'multiprocessing',
-    return_results: bool = True,
-) -> list:
+    f: 'Callable',
+    args: 'Iterable[Iterable]',
+    processes: 'Optional[int]' = None,
+    mode: 'str' = 'multiprocessing',
+    return_results: 'bool' = True,
+) -> 'list':
     '''equiv to `starmap(f, args)` but in parallel
 
     See docstring from :func:`~map_parallel.map_parallel`
