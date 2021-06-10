@@ -10,3 +10,7 @@ mpi:
 	mpiexec $(MPIARGS) -np $(N_PROC) coverage run --parallel-mode --branch tests/map_parallel_mpi_simple_test.py
 	mpiexec $(MPIARGS) -np $(N_PROC) coverage run --parallel-mode --branch tests/starmap_parallel_mpi_test.py
 	mpiexec $(MPIARGS) -np $(N_PROC) coverage run --parallel-mode --branch tests/starmap_parallel_mpi_simple_test.py
+
+pypi:
+	python setup.py sdist bdist_wheel
+	twine upload dist/*
