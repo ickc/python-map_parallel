@@ -56,9 +56,9 @@ Overview
     :alt: Supported implementations
     :target: https://pypi.org/project/map-parallel
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/ickc/python-map_parallel/v0.1.1.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/ickc/python-map_parallel/v0.2.0.svg
     :alt: Commits since latest release
-    :target: https://github.com/ickc/python-map_parallel/compare/v0.1.1...master
+    :target: https://github.com/ickc/python-map_parallel/compare/v0.2.0...master
 
 
 .. |scrutinizer| image:: https://img.shields.io/scrutinizer/quality/g/ickc/python-map_parallel/master.svg

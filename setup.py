@@ -25,7 +25,7 @@ def read(*names, **kwargs):
 
 setup(
     name='map-parallel',
-    version='0.1.1',
+    version='0.2.0',
     license='BSD-3-Clause',
     description='A drop-in replacement of map/starmap but in parallel with different backends.',
     long_description='%s\n%s' % (
