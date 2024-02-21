@@ -8,6 +8,7 @@ Contents
    readme
    installation
    usage
+   api/modules
    reference/index
    contributing
    authors
@@ -19,4 +20,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
