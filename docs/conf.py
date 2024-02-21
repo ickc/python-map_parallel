@@ -1,53 +1,56 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-import sphinx_py3doc_enhanced_theme
-
-extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.coverage',
-    'sphinx.ext.doctest',
-    'sphinx.ext.extlinks',
-    'sphinx.ext.ifconfig',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.todo',
-    'sphinx.ext.viewcode',
-    "sphinxcontrib.apidoc",
-]
-source_suffix = '.rst'
-master_doc = 'index'
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
 project = 'map_parallel'
-year = '2020'
-author = 'Kolen Cheung'
-copyright = '{0}, {1}'.format(year, author)
-version = release = '0.2.0'
+author = "Kolen Cheung"
+year = "2020-2024"
+copyright = f"{year}, {author}"
+del year
+release = "0.2.0"
+version = ".".join(release.split(".")[:-1])
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.coverage",
+    "sphinx.ext.doctest",
+    "sphinx.ext.extlinks",
+    "sphinx.ext.ifconfig",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.todo",
+    "sphinx.ext.viewcode",
+    "sphinxcontrib.apidoc",
+    "myst_parser",
+    "sphinx_last_updated_by_git",
+]
+source_suffix = [".md", ".rst"]
+# https://github.com/mgeier/sphinx-last-updated-by-git/issues/40
+needs_sphinx = "5.2"
+pygments_style = "solarized-light"
+html_theme = "furo"
+html_last_updated_fmt = "%Y-%m-%dT%H:%M:%S%z"
+latex_engine = "lualatex"
 
-pygments_style = 'trac'
-templates_path = ['.']
-extlinks = {
-    'issue': ('https://github.com/ickc/python-map_parallel/issues/%s', '#'),
-    'pr': ('https://github.com/ickc/python-map_parallel/pull/%s', 'PR #'),
-}
-html_theme = "sphinx_py3doc_enhanced_theme"
-html_theme_path = [sphinx_py3doc_enhanced_theme.get_html_theme_path()]
-html_theme_options = {
-    'githuburl': 'https://github.com/ickc/python-map_parallel/'
-}
-
-html_use_smartypants = True
-html_last_updated_fmt = '%b %d, %Y'
-html_split_index = False
-html_sidebars = {
-   '**': ['searchbox.html', 'globaltoc.html', 'sourcelink.html'],
-}
-html_short_title = '%s-%s' % (project, version)
-
-napoleon_use_ivar = True
-napoleon_use_rtype = False
-napoleon_use_param = False
+# https://myst-parser.readthedocs.io/en/stable/syntax/optional.html
+myst_enable_extensions = [
+    "dollarmath",
+    "amsmath",
+    "deflist",
+    "fieldlist",
+    "html_admonition",
+    "html_image",
+    "colon_fence",
+    "smartquotes",
+    "replacements",
+    "linkify",
+    "strikethrough",
+    "substitution",
+    "tasklist",
+    "attrs_inline",
+    "attrs_block",
+]
 
 # https://github.com/sphinx-contrib/apidoc
 apidoc_module_dir = "../src/map_parallel"
 apidoc_separate_modules = True
 apidoc_module_first = True
+
+# https://github.com/mgeier/sphinx-last-updated-by-git/
+git_last_updated_timezone = "Europe/London"

@@ -9,7 +9,6 @@ Contents
    installation
    usage
    api/modules
-   reference/index
    contributing
    authors
    changelog
