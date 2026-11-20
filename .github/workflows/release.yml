@@ -1,0 +1,78 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - name: Check that the tag matches the version
+        run: |
+          version="$(uv version --short --frozen)"
+          echo "tag: ${GITHUB_REF_NAME}, pyproject.toml: ${version}"
+          test "${GITHUB_REF_NAME}" = "v${version}"
+      - name: Check that CHANGELOG.md has the version
+        run: grep -q "^## ${GITHUB_REF_NAME}\b" CHANGELOG.md
+      - run: uv build
+      - name: Test the wheel
+        run: uv run --isolated --no-project --python 3.11 --with dist/*.whl --with pytest --with pytest-timeout pytest tests
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  publish:
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/map-parallel/
+    permissions:
+      id-token: write # trusted publishing and PEP 740 attestations
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+
+  # Zenodo archives each GitHub release (through its webhook), under a new DOI
+  github-release:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: dist/
+      - name: Release notes from CHANGELOG.md
+        run: |
+          awk -v tag="${GITHUB_REF_NAME}" '
+            index($0, "## " tag) == 1 { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md > notes.md
+          test -s notes.md
+          cat notes.md
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" dist/* --repo "${GITHUB_REPOSITORY}" --title "map_parallel ${GITHUB_REF_NAME}" --notes-file notes.md --verify-tag

@@ -1,0 +1,91 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: ${{ matrix.environment }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    env:
+      # UCX, MPICH's transport on Linux, fails to open the RDMA device of some
+      # runners (Azure VMs with a MANA adapter); one node needs none
+      UCX_TLS: self,sm,tcp
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        # every environment on every platform in [tool.pixi.workspace]: what a
+        # worker inherits, and how it starts (fork, forkserver or spawn),
+        # differs between them
+        os:
+          - ubuntu-latest # linux-64
+          - ubuntu-24.04-arm # linux-aarch64
+          - macos-15-intel # osx-64
+          - macos-latest # osx-arm64
+          - windows-latest # win-64
+        environment:
+          - test-py311
+          - test-py312
+          - test-py313
+          - test-py314
+          - test-py315
+          - test-py313t
+          - test-py314t
+          - test-py315t
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: prefix-dev/setup-pixi@9936258fee697aff89b3fed6ca1f80a382ef694e # v0.11.3
+        with:
+          pixi-version: v0.84.2
+          environments: ${{ matrix.environment }}
+          locked: true
+          cache: true
+          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
+      - name: Environment
+        run: pixi run -e ${{ matrix.environment }} python tools/env_info.py
+      - name: Test
+        run: pixi run -e ${{ matrix.environment }} coverage
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: prefix-dev/setup-pixi@9936258fee697aff89b3fed6ca1f80a382ef694e # v0.11.3
+        with:
+          pixi-version: v0.84.2
+          environments: lint
+          locked: true
+          cache: true
+          cache-write: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
+      - run: pixi run -e lint lint
+
+  # what the release workflow publishes: build it, and test the wheel outside pixi
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - run: uv build
+      - name: Test the wheel
+        run: uv run --isolated --no-project --python 3.11 --with dist/*.whl --with pytest --with pytest-timeout pytest tests

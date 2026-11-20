@@ -1,0 +1,210 @@
+[build-system]
+requires = ["uv_build>=0.9,<0.14"]
+build-backend = "uv_build"
+
+[project]
+name = "map-parallel"
+version = "0.3.0"
+description = "A drop-in replacement of map/starmap but in parallel with different backends."
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+authors = [{ name = "Kolen Cheung", email = "christian.kolen@gmail.com" }]
+keywords = [
+    "map",
+    "starmap",
+    "parallel",
+    "concurrency",
+    "multiprocessing",
+    "multithreading",
+    "subinterpreters",
+    "free-threading",
+    "dask",
+    "mpi",
+    "mpi4py",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Programming Language :: Python :: Free Threading :: 3 - Stable",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: System :: Distributed Computing",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dask = ["distributed>=2023.1"]
+mpi = ["mpi4py>=3.1"]
+
+[project.urls]
+Homepage = "https://github.com/ickc/python-map_parallel"
+Documentation = "https://ickc.github.io/python-map_parallel"
+Repository = "https://github.com/ickc/python-map_parallel"
+Issues = "https://github.com/ickc/python-map_parallel/issues"
+Changelog = "https://github.com/ickc/python-map_parallel/blob/main/CHANGELOG.md"
+
+[dependency-groups]
+test = [
+    "pytest>=8",
+    "pytest-timeout>=2.3",
+    "coverage>=7.10",
+]
+lint = ["ruff>=0.6"]
+# sphinx.ext.apidoc is new in sphinx 8.2
+docs = [
+    "sphinx>=8.2",
+    "furo>=2024.8.6",
+    "myst-parser>=4",
+]
+
+[tool.uv]
+default-groups = ["test", "lint"]
+
+[tool.uv.build-backend]
+source-include = [
+    "tests/**",
+    "docs/**",
+    "CHANGELOG.md",
+]
+source-exclude = ["docs/api"]
+
+# pixi: development and CI environments ########################################
+# The features test, lint and docs come from [dependency-groups]. dask and mpi4py
+# (with an MPI implementation) come from conda-forge, in features named apart
+# from the extras dask and mpi, which pixi would otherwise merge in from PyPI.
+# conda-forge has them for every platform and GIL-enabled Python below, but not
+# yet for every free-threaded build: 3.13t has neither, 3.15t no dask (no
+# tornado for cp315t). The tests of a backend whose package is missing are
+# skipped.
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["linux-64", "linux-aarch64", "osx-64", "osx-arm64", "win-64"]
+
+[tool.pixi.dependencies]
+python = ">=3.11"
+
+[tool.pixi.pypi-dependencies]
+map-parallel = { path = ".", editable = true }
+
+[tool.pixi.feature.conda-dask.dependencies]
+distributed = ">=2023.1"
+
+[tool.pixi.feature.conda-mpi.dependencies]
+mpi4py = ">=3.1"
+# on win-64, conda-forge's mpi4py is built against msmpi, which it pulls in
+[tool.pixi.feature.conda-mpi.target.unix.dependencies]
+mpich = "*"
+
+[tool.pixi.feature.py311.dependencies]
+python = "3.11.*"
+[tool.pixi.feature.py312.dependencies]
+python = "3.12.*"
+[tool.pixi.feature.py313.dependencies]
+python = "3.13.*"
+[tool.pixi.feature.py314.dependencies]
+python = "3.14.*"
+[tool.pixi.feature.py315.dependencies]
+python = "3.15.*"
+# free-threaded builds (PEP 703); 3.13t is experimental, 3.14t on are supported
+[tool.pixi.feature.py313t.dependencies]
+python-freethreading = "3.13.*"
+[tool.pixi.feature.py314t.dependencies]
+python-freethreading = "3.14.*"
+[tool.pixi.feature.py315t.dependencies]
+python-freethreading = "3.15.*"
+
+[tool.pixi.feature.test.tasks]
+test = { cmd = "coverage run -m pytest --durations=10", description = "Run the tests under coverage" }
+coverage = { cmd = "coverage combine && coverage report", depends-on = ["test"], description = "Run the tests, then report coverage" }
+
+[tool.pixi.feature.lint.dependencies]
+python = ">=3.11"
+
+[tool.pixi.feature.lint.tasks]
+format = "ruff format && ruff check --fix"
+lint = "ruff format --check && ruff check"
+
+[tool.pixi.feature.docs.tasks]
+docs = { cmd = "sphinx-build -W --keep-going -b dirhtml docs dist/docs", description = "Build the documentation to dist/docs" }
+
+[tool.pixi.feature.build.dependencies]
+uv = "*"
+
+[tool.pixi.feature.build.tasks]
+build = "uv build"
+bump = { cmd = "tools/bump.sh", description = "Bump the version, commit, tag and push, which releases: pixi run bump [major|minor|patch]" }
+
+[tool.pixi.environments]
+default = { features = ["test", "lint", "conda-dask", "conda-mpi"], solve-group = "default" }
+test-py311 = ["py311", "test", "conda-dask", "conda-mpi"]
+test-py312 = ["py312", "test", "conda-dask", "conda-mpi"]
+test-py313 = ["py313", "test", "conda-dask", "conda-mpi"]
+test-py314 = ["py314", "test", "conda-dask", "conda-mpi"]
+test-py315 = ["py315", "test", "conda-dask", "conda-mpi"]
+test-py313t = ["py313t", "test"]
+test-py314t = ["py314t", "test", "conda-dask", "conda-mpi"]
+test-py315t = ["py315t", "test", "conda-mpi"]
+docs = { features = ["docs"], solve-group = "default" }
+lint = { features = ["lint"], no-default-feature = true }
+build = { features = ["build"], no-default-feature = true }
+
+[tool.coverage.paths]
+source = [
+    "src",
+    "*/site-packages",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["map_parallel"]
+concurrency = ["thread", "multiprocessing"]
+parallel = true
+# also measure the Python processes the MPI tests start through mpiexec
+patch = ["subprocess"]
+relative_files = true
+
+[tool.coverage.report]
+show_missing = true
+precision = 2
+exclude_also = [
+    "if TYPE_CHECKING:",
+]
+
+[tool.pytest.ini_options]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--doctest-modules",
+    "--tb=short",
+]
+testpaths = ["tests", "src"]
+markers = [
+    "mpi: runs scripts under mpiexec (deselect with '-m \"not mpi\"')",
+]
+# a hung pool fails the test instead of the CI job
+timeout = 300
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["map_parallel"]
