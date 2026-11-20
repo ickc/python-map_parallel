@@ -25,7 +25,13 @@ def mpiexec(mode: str, *args: str, n: int = N) -> dict[int, str]:
     """Run check.py on ``n`` MPI processes, and return the line each rank printed, by rank."""
     assert MPIEXEC is not None
     python = [sys.executable, "-m", "mpi4py.futures"] if mode == "mpi" else [sys.executable]
-    env = os.environ | {"PYTHONPATH": os.pathsep.join(filter(None, [str(TESTS), os.environ.get("PYTHONPATH")]))}
+    env = {
+        # on one node, UCX (MPICH's transport on Linux) needs no network but
+        # TCP: on some CI runners, it fails to open the RDMA device it finds
+        "UCX_TLS": "self,sm,tcp",
+        **os.environ,
+        "PYTHONPATH": os.pathsep.join(filter(None, [str(TESTS), os.environ.get("PYTHONPATH")])),
+    }
     # a timeout, rather than a hung job, if a rank waits for another that failed
     proc = subprocess.run(
         [MPIEXEC, "-n", str(n), *python, str(TESTS / "mpi" / "check.py"), mode, *args],
