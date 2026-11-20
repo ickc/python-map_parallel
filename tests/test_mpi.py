@@ -33,13 +33,16 @@ def mpiexec(mode: str, *args: str, n: int = N) -> dict[int, str]:
         "PYTHONPATH": os.pathsep.join(filter(None, [str(TESTS), os.environ.get("PYTHONPATH")])),
     }
     # a timeout, rather than a hung job, if a rank waits for another that failed
-    proc = subprocess.run(
-        [MPIEXEC, "-n", str(n), *python, str(TESTS / "mpi" / "check.py"), mode, *args],
-        capture_output=True,
-        text=True,
-        env=env,
-        timeout=120,
-    )
+    try:
+        proc = subprocess.run(
+            [MPIEXEC, "-n", str(n), *python, str(TESTS / "mpi" / "check.py"), mode, *args],
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=120,
+        )
+    except subprocess.TimeoutExpired as e:
+        pytest.fail(f"timed out after {e.timeout} s\nstdout:\n{e.stdout}\nstderr:\n{e.stderr}")
     assert proc.returncode == 0, f"stdout:\n{proc.stdout}\nstderr:\n{proc.stderr}"
     lines = {}
     for match in re.finditer(r"^rank (\d+)/(\d+): (.*)$", proc.stdout, re.MULTILINE):

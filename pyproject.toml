@@ -128,7 +128,7 @@ python-freethreading = "3.14.*"
 python-freethreading = "3.15.*"
 
 [tool.pixi.feature.test.tasks]
-test = { cmd = "coverage run -m pytest", description = "Run the tests under coverage" }
+test = { cmd = "coverage run -m pytest --durations=10", description = "Run the tests under coverage" }
 coverage = { cmd = "coverage combine && coverage report", depends-on = ["test"], description = "Run the tests, then report coverage" }
 
 [tool.pixi.feature.lint.dependencies]

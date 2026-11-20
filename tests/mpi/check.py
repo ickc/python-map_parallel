@@ -8,11 +8,18 @@ failure raises. ``workloads`` must be importable, e.g. through PYTHONPATH.
 """
 
 import argparse
+import sys
+import time
 
 import workloads as w
 from mpi4py import MPI
 
 from map_parallel import map_parallel, starmap_parallel
+
+
+def progress(rank: int, step: str, t: float) -> None:
+    """On stderr, so that a test that times out shows how far each rank got."""
+    print(f"rank {rank}: {step} done in {time.perf_counter() - t:.2f} s", file=sys.stderr, flush=True)
 
 
 def check_results(mode: str, rank: int) -> str:
@@ -22,11 +29,14 @@ def check_results(mode: str, rank: int) -> str:
 
     for chunksize in (1, 4):
         kwargs = dict(mode=mode, chunksize=chunksize)
+        t = time.perf_counter()
         assert (res := map_parallel(w.f, *w.COLUMNS, **kwargs)) == expected(w.TRUTH), res
+        progress(rank, f"map_parallel, chunksize={chunksize}", t)
         assert (res := starmap_parallel(w.f, w.ARGS, **kwargs)) == expected(w.TRUTH), res
         assert (res := starmap_parallel(w.total, [(1,), (1, 2), (1, 2, 3)], **kwargs)) == expected([1, 3, 6]), res
         assert map_parallel(w.f, *w.COLUMNS, return_results=False, **kwargs) == []
         assert map_parallel(w.f, [], [], [], **kwargs) == []
+        progress(rank, f"all, chunksize={chunksize}", t)
     # processes=1 is serial, on every rank
     assert map_parallel(w.f, *w.COLUMNS, mode=mode, processes=1) == w.TRUTH
     return "ok"
