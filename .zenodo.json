@@ -1,0 +1,34 @@
+{
+  "upload_type": "software",
+  "creators": [
+    {
+      "name": "Cheung, Kolen",
+      "affiliation": "University of Exeter",
+      "orcid": "0000-0002-7764-378X"
+    }
+  ],
+  "license": "bsd-3-clause",
+  "keywords": [
+    "parallel computing",
+    "map",
+    "multiprocessing",
+    "multithreading",
+    "subinterpreters",
+    "free-threading",
+    "dask",
+    "MPI",
+    "mpi4py"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://ickc.github.io/python-map_parallel",
+      "relation": "isDocumentedBy",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://pypi.org/project/map-parallel/",
+      "relation": "isIdenticalTo",
+      "scheme": "url"
+    }
+  ]
+}
