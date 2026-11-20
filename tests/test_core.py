@@ -213,17 +213,11 @@ class Unpicklable(Exception):
         self.attribute = lambda: None
 
 
-class Ununpicklable(Exception):
-    def __init__(self, a, b):
-        super().__init__(a)  # pickles args=(a,), so that unpickling calls __init__(a)
-
-
 @pytest.mark.parametrize(
     "exc, type_, message",
     [
         (w.Bad("bad input: 3"), w.Bad, "bad input: 3"),
         (Unpicklable(), RuntimeError, "Unpicklable('unpicklable')"),
-        (Ununpicklable(1, 2), RuntimeError, "does not unpickle was raised on MPI rank 2"),
     ],
 )
 def test_exception_payload(exc, type_, message):
@@ -237,3 +231,15 @@ def test_exception_payload(exc, type_, message):
     assert type(remote.__cause__).__name__ == "_RemoteTraceback"
     assert "raised on MPI rank 2" in str(remote.__cause__)
     assert f"{type(exc).__name__}" in str(remote.__cause__)
+
+
+def test_exception_payload_does_not_unpickle():
+    """Whether an exception unpickles depends on more than its class: importing
+    distributed, for one, installs tblib's pickling of exceptions, which does
+    not call __init__. So the payload is made by hand, of a class that is
+    nowhere to be found."""
+    payload = ("Traceback: ...", b"cno_such_module\nNoSuchError\n.")
+    remote = package._exception_from_payload(2, payload)
+    assert type(remote) is RuntimeError
+    assert "does not unpickle was raised on MPI rank 2" in str(remote)
+    assert "Traceback: ..." in str(remote.__cause__)
