@@ -22,7 +22,9 @@ pixi run -e test-py315 python tools/benchmark.py  # the numbers in docs/backends
 ```
 
 The MPI tests run `tests/mpi/check.py` under `mpiexec`, and are skipped where
-mpi4py or `mpiexec` is missing; deselect them with `-m "not mpi"`. conda-forge
+mpi4py or `mpiexec` is missing; deselect them with `-m "not mpi"`. Those of
+`mode="mpi"` are also skipped on free-threaded Python on macOS x86-64, where
+`mpi4py.futures` takes up to a minute a call. conda-forge
 does not have every optional dependency for every free-threaded build yet; the
 tests of a backend that is missing are skipped.
 

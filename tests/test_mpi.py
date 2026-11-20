@@ -1,10 +1,12 @@
 """Tests of mode="mpi" and mode="mpi_simple": tests/mpi/check.py, run under mpiexec."""
 
 import os
+import platform
 import re
 import shutil
 import subprocess
 import sys
+import sysconfig
 from pathlib import Path
 
 import pytest
@@ -19,6 +21,14 @@ pytestmark = [
     pytest.mark.mpi,
     pytest.mark.skipif(MPIEXEC is None, reason="mpiexec not found"),
 ]
+
+# On GitHub's macos-15-intel runners, a call of MPIPoolExecutor took up to 70 s
+# on a free-threaded build (0.2 s on Linux, a few seconds on macOS ARM64), which
+# is mpi4py.futures', not map_parallel's; mpi_simple stays tested there.
+slow_futures = pytest.mark.skipif(
+    bool(sysconfig.get_config_var("Py_GIL_DISABLED")) and sys.platform == "darwin" and platform.machine() == "x86_64",
+    reason="mpi4py.futures is too slow on free-threaded Python on macOS x86-64",
+)
 
 
 def mpiexec(mode: str, *args: str, n: int = N) -> dict[int, str]:
@@ -68,11 +78,13 @@ def test_mpi_simple_exception(return_results):
     }
 
 
+@slow_futures
 def test_mpi():
     """With python -m mpi4py.futures, only rank 0 runs the script; the others are the pool's workers."""
     assert mpiexec("mpi") == {0: "ok"}
 
 
+@slow_futures
 @pytest.mark.parametrize("return_results", [True, False])
 def test_mpi_exception(return_results):
     lines = mpiexec("mpi", "--exception", *([] if return_results else ["--no-return-results"]))
