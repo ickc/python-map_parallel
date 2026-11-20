@@ -15,7 +15,7 @@ print(f"platform: {platform.platform()} ({platform.machine()})")
 print(f"free-threaded build: {bool(sysconfig.get_config_var('Py_GIL_DISABLED'))}")
 print(f"multiprocessing start method: {multiprocessing.get_start_method()}")
 print(f"InterpreterPoolExecutor: {sys.version_info >= (3, 14)}")
-for module in ("distributed", "mpi4py"):
+for module in ("distributed", "mpi4py"):  # distributed imports its C extensions
     spec = importlib.util.find_spec(module)
     if spec is None:
         print(f"{module}: missing")
@@ -24,8 +24,10 @@ for module in ("distributed", "mpi4py"):
         print(f"{module}: {mod.__version__}")
 if importlib.util.find_spec("mpi4py") is not None:
     import mpi4py
+    import mpi4py.MPI  # the extension module, which may re-enable the GIL
 
     print(f"mpi4py config: {mpi4py.get_config()}")
+    print(f"MPI library: {mpi4py.MPI.Get_library_version().splitlines()[0]}")
 mpiexec = shutil.which("mpiexec")
 print(f"mpiexec: {mpiexec}")
 if hasattr(sys, "_is_gil_enabled"):
