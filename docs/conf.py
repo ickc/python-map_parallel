@@ -1,56 +1,37 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
-project = 'map_parallel'
+from importlib.metadata import version as get_version
+
+project = "map_parallel"
 author = "Kolen Cheung"
-year = "2020-2024"
-copyright = f"{year}, {author}"
-del year
-release = "0.2.0"
-version = ".".join(release.split(".")[:-1])
+copyright = f"2020, {author}"
+version = release = get_version("map-parallel")
+
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary",
-    "sphinx.ext.coverage",
-    "sphinx.ext.doctest",
-    "sphinx.ext.extlinks",
-    "sphinx.ext.ifconfig",
-    "sphinx.ext.napoleon",
-    "sphinx.ext.todo",
-    "sphinx.ext.viewcode",
-    "sphinxcontrib.apidoc",
     "myst_parser",
-    "sphinx_last_updated_by_git",
+    "sphinx.ext.apidoc",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.viewcode",
 ]
-source_suffix = [".md", ".rst"]
-# https://github.com/mgeier/sphinx-last-updated-by-git/issues/40
-needs_sphinx = "5.2"
-pygments_style = "solarized-light"
+source_suffix = {".md": "markdown", ".rst": "restructuredtext"}
+exclude_patterns = ["_build"]
+
 html_theme = "furo"
-html_last_updated_fmt = "%Y-%m-%dT%H:%M:%S%z"
-latex_engine = "lualatex"
+html_title = f"{project} {version}"
 
-# https://myst-parser.readthedocs.io/en/stable/syntax/optional.html
-myst_enable_extensions = [
-    "dollarmath",
-    "amsmath",
-    "deflist",
-    "fieldlist",
-    "html_admonition",
-    "html_image",
-    "colon_fence",
-    "smartquotes",
-    "replacements",
-    "linkify",
-    "strikethrough",
-    "substitution",
-    "tasklist",
-    "attrs_inline",
-    "attrs_block",
+autodoc_member_order = "bysource"
+apidoc_modules = [
+    {
+        "path": "../src/map_parallel",
+        "destination": "api",
+        "separate_modules": True,
+        "module_first": True,
+    },
 ]
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "distributed": ("https://distributed.dask.org/en/stable", None),
+    "mpi4py": ("https://mpi4py.readthedocs.io/en/stable", None),
+}
 
-# https://github.com/sphinx-contrib/apidoc
-apidoc_module_dir = "../src/map_parallel"
-apidoc_separate_modules = True
-apidoc_module_first = True
-
-# https://github.com/mgeier/sphinx-last-updated-by-git/
-git_last_updated_timezone = "Europe/London"
+myst_heading_anchors = 3
